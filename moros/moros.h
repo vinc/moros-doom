@@ -26,6 +26,7 @@ long      write(long handle, const void *buf, size_t len);
 long      lseek(long handle, long offset, int whence);
 
 /* Memory */
+size_t    malloc_get_size(void *ptr);
 void     *malloc(size_t size);
 void      free(void *ptr);
 

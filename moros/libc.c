@@ -156,16 +156,28 @@ void *calloc(size_t n, size_t size) {
 }
 
 void *realloc(void *ptr, size_t size) {
-    /* TODO: NULL ptr means plain malloc; size 0 means free + NULL.
-     * Otherwise malloc the new size, memcpy the smaller of old and
-     * new sizes, free the old block. The old size lives in the
-     * malloc header in moros.c: either expose a helper there or move
-     * the malloc family into this file. Only reached from network
-     * game checksums, so it can wait. */
-    (void)ptr;
-    (void)size;
-    todo("realloc");
-    return NULL;
+    if (!ptr) {
+        return malloc(size);
+    }
+
+    if (size == 0) {
+        free(ptr);
+        return NULL;
+    }
+
+    size_t old_payload_size = malloc_get_size(ptr);
+
+    void *new_ptr = malloc(size);
+    if (!new_ptr) {
+        return NULL;
+    }
+
+    size_t copy_size = (old_payload_size < size) ? old_payload_size : size;
+    memcpy(new_ptr, ptr, copy_size);
+
+    free(ptr);
+
+    return new_ptr;
 }
 
 int abs(int n) {

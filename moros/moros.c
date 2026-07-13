@@ -52,6 +52,18 @@ struct malloc_header {
     uint64_t magic;
 };
 
+size_t malloc_get_size(void *ptr) {
+    if (!ptr) return 0;
+
+    struct malloc_header *header = (struct malloc_header *)ptr - 1;
+
+    if (header->magic != MALLOC_MAGIC) {
+        return 0; // Corrupted or invalid pointer
+    }
+
+    return header->size - sizeof(struct malloc_header);
+}
+
 void *malloc(size_t size) {
     if (size == 0) {
         return NULL;
