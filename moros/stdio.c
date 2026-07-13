@@ -108,15 +108,7 @@ size_t fwrite(const void *ptr, size_t size, size_t n, FILE *f) {
 }
 
 int fseek(FILE *f, long offset, int whence) {
-    /* TODO: lseek(f->handle, offset, whence); return 0 on success,
-     * -1 on failure. whence values match the SEEK syscall already.
-     * This is the hottest stdio call in DOOM: W_ReadLump seeks
-     * before every lump read. */
-    (void)f;
-    (void)offset;
-    (void)whence;
-    todo("fseek");
-    return -1;
+    return lseek(f->handle, offset, whence);
 }
 
 long ftell(FILE *f) {
