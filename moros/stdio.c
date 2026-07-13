@@ -224,6 +224,34 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap) {
                 }
                 break;
             }
+            case 'u':
+            case 'x':
+            case 'X': {
+                unsigned int uval = va_arg(ap, unsigned int);
+                int base = (*fmt == 'u') ? 10 : 16;
+                const char *hex_digits = (*fmt == 'X') ? "0123456789ABCDEF" : "0123456789abcdef";
+
+                char num_buf[32];
+                int idx = sizeof(num_buf);
+
+                if (uval == 0) {
+                    num_buf[--idx] = '0';
+                } else {
+                    while (uval > 0) {
+                        num_buf[--idx] = hex_digits[uval % base];
+                        uval /= base;
+                    }
+                }
+
+                while (idx < (int)sizeof(num_buf)) {
+                    if (writen + 1 < size && buf) {
+                        buf[writen] = num_buf[idx];
+                    }
+                    writen++;
+                    idx++;
+                }
+                break;
+            }
             default: {
                 if (*fmt) {
                     if (writen + 1 < size && buf) {
