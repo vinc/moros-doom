@@ -41,10 +41,45 @@ FILE *fopen(const char *path, const char *mode) {
      * Return NULL on failure. DOOM calls this from the WAD loader
      * (w_file_stdc.c), config loading, and savegames. Binary vs text
      * mode is meaningless here: ignore 'b'. */
-    (void)path;
-    (void)mode;
-    todo("fopen");
-    return NULL;
+    if (!path || !mode) {
+      return NULL;
+    }
+    printf("fopen: opening '%s' (mode: '%s')\n", path, mode);
+    int flags = 0;
+    switch (mode[0]) {
+        case 'r':
+            flags = 1;
+            break;
+        case 'w':
+            flags = 2;
+            break;
+        case 'a':
+            flags = 4;
+            break;
+        default:
+            return NULL;
+    }
+
+    int slot = -1;
+    for (int i = 0; i < MAX_FILES; i++) {
+        if (!files[i].used) {
+            slot = i;
+            break;
+        }
+    }
+    if (slot == -1) {
+        return NULL;
+    }
+
+    long handle = open(path, flags);
+    if (handle < 0) {
+        return NULL;
+    }
+
+    files[slot].handle = handle;
+    files[slot].used = 1;
+
+    return &files[slot];
 }
 
 int fclose(FILE *f) {
