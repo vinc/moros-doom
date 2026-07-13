@@ -175,29 +175,26 @@ int snprintf(char *buf, size_t size, const char *fmt, ...) {
 }
 
 int vfprintf(FILE *f, const char *fmt, va_list ap) {
-    /* TODO: vsnprintf into a stack buffer (1 KB is plenty for DOOM's
-     * messages), then write(f->handle, ...). */
-    (void)f;
-    (void)fmt;
-    (void)ap;
-    todo("vfprintf");
-    return 0;
+    char buf[1024];
+    int n = vsnprintf(buf, 1024, fmt, ap);
+    write(f->handle, buf, n);
+    return n;
 }
 
 int fprintf(FILE *f, const char *fmt, ...) {
-    /* TODO: va wrapper over vfprintf. */
-    (void)f;
-    (void)fmt;
-    todo("fprintf");
-    return 0;
+    va_list ap;
+    va_start(ap, fmt);
+    int n = vfprintf(f, fmt, ap);
+    va_end(ap);
+    return n;
 }
 
 int printf(const char *fmt, ...) {
-    /* TODO: va wrapper over vfprintf(stdout, ...). This is DOOM's
-     * boot banner: the first satisfying thing to implement. */
-    (void)fmt;
-    todo("printf");
-    return 0;
+    va_list ap;
+    va_start(ap, fmt);
+    int n = vfprintf(stdout, fmt, ap);
+    va_end(ap);
+    return n;
 }
 
 int sscanf(const char *str, const char *fmt, ...) {
