@@ -238,7 +238,9 @@ int mkdir(const char *path, unsigned int mode) {
  */
 
 int toupper(int c) {
-    todo("toupper");
+    if (c >= 'a' && c <= 'z') {
+        return c - ('a' - 'A');
+    }
     return c;
 }
 
