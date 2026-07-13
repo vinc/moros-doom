@@ -69,13 +69,20 @@ char *strcpy(char *dst, const char *src) {
 }
 
 char *strncpy(char *dst, const char *src, size_t n) {
-    /* TODO: copy at most n bytes, NUL-pad the remainder if src is
-     * shorter. Note the standard's trap: if src is longer than n,
-     * dst is NOT NUL terminated. DOOM relies on that for its 8-byte
-     * lump names, so implement it faithfully. */
-    (void)src;
-    (void)n;
-    todo("strncpy");
+    if (!dst || !src) {
+      return dst;
+    }
+
+    size_t i;
+    for (i = 0; i < n && src[i] != '\0'; i++) {
+        dst[i] = src[i];
+    }
+
+    // Pad the remaining bytes
+    for (; i < n; i++) {
+        dst[i] = '\0';
+    }
+
     return dst;
 }
 
