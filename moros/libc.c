@@ -60,10 +60,12 @@ int strncasecmp(const char *l, const char *r, size_t n) {
 }
 
 char *strcpy(char *dst, const char *src) {
-    /* TODO: copy including the NUL; return dst. */
-    (void)src;
-    todo("strcpy");
-    return dst;
+    if (!dst || !src) {
+      return dst;
+    }
+    char *orig = dst;
+    while ((*dst++ = *src++) != '\0') {}
+    return orig;
 }
 
 char *strncpy(char *dst, const char *src, size_t n) {
