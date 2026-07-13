@@ -31,41 +31,32 @@ void assert_fail(const char *expr, const char *file, int line) {
 
 /* --- string.h ------------------------------------------------------ */
 
-int strcmp(const char *a, const char *b) {
-    /* TODO: compare byte by byte until a difference or both NUL;
-     * return <0, 0, >0. Compare as unsigned char. */
-    (void)a;
-    (void)b;
-    todo("strcmp");
-    return 0;
+// Source: musl
+int strcmp(const char *l, const char *r) {
+    for (; *l==*r && *l; l++, r++);
+	  return *(unsigned char *)l - *(unsigned char *)r;
 }
 
-int strncmp(const char *a, const char *b, size_t n) {
-    /* TODO: strcmp limited to n bytes. Used heavily by the WAD
-     * loader on 8-byte lump names. */
-    (void)a;
-    (void)b;
-    (void)n;
-    todo("strncmp");
-    return 0;
+// Source: musl
+int strncmp(const char *l, const char *r, size_t n) {
+    //const unsigned char *l=(void *)_l, *r=(void *)_r;
+    if (!n--) return 0;
+    for (; *l && *r && n && *l == *r ; l++, r++, n--);
+    return *l - *r;
 }
 
-int strcasecmp(const char *a, const char *b) {
-    /* TODO: strcmp through tolower(). DOOM lump and IWAD names are
-     * case-insensitive. */
-    (void)a;
-    (void)b;
-    todo("strcasecmp");
-    return 0;
+// Source: musl
+int strcasecmp(const char *l, const char *r) {
+    //const unsigned char *l=(void *)_l, *r=(void *)_r;
+    for (; *l && *r && (*l == *r || tolower(*l) == tolower(*r)); l++, r++);
+    return tolower(*l) - tolower(*r);
 }
 
-int strncasecmp(const char *a, const char *b, size_t n) {
-    /* TODO: length-limited strcasecmp. */
-    (void)a;
-    (void)b;
-    (void)n;
-    todo("strncasecmp");
-    return 0;
+int strncasecmp(const char *l, const char *r, size_t n) {
+    //const unsigned char *l=(void *)_l, *r=(void *)_r;
+    if (!n--) return 0;
+    for (; *l && *r && n && (*l == *r || tolower(*l) == tolower(*r)); l++, r++, n--);
+    return tolower(*l) - tolower(*r);
 }
 
 char *strcpy(char *dst, const char *src) {
