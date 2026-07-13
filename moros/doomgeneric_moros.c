@@ -52,12 +52,14 @@ static const unsigned char keys[128] = {
 
 void todo(const char *name);
 
+static long clk_boot_fh = -1;
 static long vga_mode_fh = -1;
 static long vga_palette_fh = -1;
 static long vga_buffer_fh = -1;
 static long kbd_buffer_fh = -1;
 
 void DG_Init(void) {
+    clk_boot_fh    = open("/dev/clk/boot", 64);
     vga_mode_fh    = open("/dev/vga/mode", 64);
     vga_palette_fh = open("/dev/vga/palette", 64);
     vga_buffer_fh  = open("/dev/vga/buffer", 64);
@@ -110,12 +112,35 @@ int DG_GetKey(int *pressed, unsigned char *doomKey) {
 }
 
 uint32_t DG_GetTicksMs(void) {
-    /* TODO: monotonic milliseconds since boot. Read /dev/clk/uptime
-     * (you wrote the device: check what it returns and convert to
-     * ms). DOOM uses this for its 35 Hz game tick, so it must
-     * actually advance or the game freezes on the first frame. */
-    todo("DG_GetTicksMs");
-    return 0;
+    char buf[32];
+    long bytes = read(clk_boot_fh, buf, sizeof(buf) - 1);
+    if (bytes <= 0) {
+        return 0;
+    }
+    buf[bytes] = '\0';
+
+    uint32_t seconds = 0;
+    uint32_t ms_fraction = 0;
+    const char *p = buf;
+
+    while (*p >= '0' && *p <= '9') {
+        seconds = seconds * 10 + (*p - '0');
+        p++;
+    }
+
+    if (*p == '.') {
+        p++;
+        uint32_t scale = 100;
+
+        while (*p >= '0' && *p <= '9' && scale > 0) {
+            ms_fraction += (*p - '0') * scale;
+            scale /= 10;
+            p++;
+        }
+    }
+
+    printf("DG_GetTicksMs: s=%d ms=%d\n", seconds, ms_fraction);
+    return (seconds * 1000) + ms_fraction;
 }
 
 void DG_SleepMs(uint32_t ms) {
