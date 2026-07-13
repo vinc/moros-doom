@@ -112,11 +112,7 @@ int fseek(FILE *f, long offset, int whence) {
 }
 
 long ftell(FILE *f) {
-    /* TODO: lseek(f->handle, 0, SEEK_CUR). Used with fseek(...,
-     * SEEK_END) by W_AddFile to get the WAD size. */
-    (void)f;
-    todo("ftell");
-    return -1;
+    return lseek(f->handle, 0, SEEK_CUR);
 }
 
 int fflush(FILE *f) {
