@@ -188,6 +188,42 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap) {
                 }
                 break;
             }
+            case 'd':
+            case 'i': {
+                int val = va_arg(ap, int);
+
+                // Negative numbers
+                if (val < 0) {
+                    if (writen + 1 < size && buf) {
+                        buf[writen] = '-';
+                    }
+                    writen++;
+                    val = -val;
+                }
+
+                // Convert integer to string
+                char num_buf[16];
+                int idx = sizeof(num_buf);
+                unsigned int uval = (unsigned int)val;
+
+                if (uval == 0) {
+                    num_buf[--idx] = '0';
+                } else {
+                    while (uval > 0) {
+                        num_buf[--idx] = '0' + (uval % 10);
+                        uval /= 10;
+                    }
+                }
+
+                while (idx < (int)sizeof(num_buf)) {
+                    if (writen + 1 < size && buf) {
+                        buf[writen] = num_buf[idx];
+                    }
+                    writen++;
+                    idx++;
+                }
+                break;
+            }
             default: {
                 if (*fmt) {
                     if (writen + 1 < size && buf) {
