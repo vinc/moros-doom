@@ -10,6 +10,16 @@
 #include <string.h>
 #include "moros.h"
 
+#define NANOPRINTF_IMPLEMENTATION
+#define NANOPRINTF_USE_FIELD_WIDTH_FORMAT_SPECIFIERS 1
+#define NANOPRINTF_USE_PRECISION_FORMAT_SPECIFIERS   1
+#define NANOPRINTF_USE_LARGE_FORMAT_SPECIFIERS       1
+#define NANOPRINTF_USE_FLOAT_FORMAT_SPECIFIERS       0
+#define NANOPRINTF_USE_BINARY_FORMAT_SPECIFIERS      0
+#define NANOPRINTF_USE_SMALL_FORMAT_SPECIFIERS       1
+#define NANOPRINTF_USE_WRITEBACK_FORMAT_SPECIFIERS   0
+#include "nanoprintf.h"
+
 void todo(const char *name); /* in libc.c: prints "TODO: <name>" */
 
 /* A FILE is just a MOROS handle. The kernel tracks the read/write
@@ -131,132 +141,7 @@ int fflush(FILE *f) {
  */
 
 int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap) {
-    int writen = 0;
-    if (!fmt) {
-      return -1;
-    }
-
-    while (*fmt) {
-        if (*fmt != '%') {
-            if (writen + 1 < size && buf) {
-                buf[writen] = *fmt;
-            }
-            writen++;
-            fmt++;
-            continue;
-        }
-
-        fmt++; // Skip '%'
-
-        switch (*fmt) {
-            case 'c': {
-                char c = (char)va_arg(ap, int);
-                if (writen + 1 < size && buf) {
-                    buf[writen] = c;
-                }
-                writen++;
-                break;
-            }
-            case 's': {
-                const char *str = va_arg(ap, const char *);
-                if (!str) {
-                    str = "(null)";
-                }
-                while (*str) {
-                    if (writen + 1 < size && buf) {
-                        buf[writen] = *str;
-                    }
-                    writen++;
-                    str++;
-                }
-                break;
-            }
-            case 'd':
-            case 'i': {
-                int val = va_arg(ap, int);
-
-                // Negative numbers
-                if (val < 0) {
-                    if (writen + 1 < size && buf) {
-                        buf[writen] = '-';
-                    }
-                    writen++;
-                    val = -val;
-                }
-
-                // Convert integer to string
-                char num_buf[16];
-                int idx = sizeof(num_buf);
-                unsigned int uval = (unsigned int)val;
-
-                if (uval == 0) {
-                    num_buf[--idx] = '0';
-                } else {
-                    while (uval > 0) {
-                        num_buf[--idx] = '0' + (uval % 10);
-                        uval /= 10;
-                    }
-                }
-
-                while (idx < (int)sizeof(num_buf)) {
-                    if (writen + 1 < size && buf) {
-                        buf[writen] = num_buf[idx];
-                    }
-                    writen++;
-                    idx++;
-                }
-                break;
-            }
-            case 'u':
-            case 'x':
-            case 'X': {
-                unsigned int uval = va_arg(ap, unsigned int);
-                int base = (*fmt == 'u') ? 10 : 16;
-                const char *hex_digits = (*fmt == 'X') ? "0123456789ABCDEF" : "0123456789abcdef";
-
-                char num_buf[32];
-                int idx = sizeof(num_buf);
-
-                if (uval == 0) {
-                    num_buf[--idx] = '0';
-                } else {
-                    while (uval > 0) {
-                        num_buf[--idx] = hex_digits[uval % base];
-                        uval /= base;
-                    }
-                }
-
-                while (idx < (int)sizeof(num_buf)) {
-                    if (writen + 1 < size && buf) {
-                        buf[writen] = num_buf[idx];
-                    }
-                    writen++;
-                    idx++;
-                }
-                break;
-            }
-            default: {
-                if (*fmt) {
-                    if (writen + 1 < size && buf) {
-                        buf[writen] = *fmt;
-                    }
-                    writen++;
-                }
-                break;
-            }
-        }
-
-        if (*fmt) {
-          fmt++; // Skip specifier
-        }
-    }
-
-    if (size > 0 && buf) {
-        size_t null_idx = (writen < size) ? (size_t)writen : (size - 1);
-        buf[null_idx] = '\0';
-    }
-
-    return writen;
+    return npf_vsnprintf(buf, size, fmt, ap);
 }
 
 int snprintf(char *buf, size_t size, const char *fmt, ...) {
