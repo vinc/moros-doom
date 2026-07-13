@@ -96,12 +96,25 @@ char *strchr(const char *s, int c) {
 }
 
 char *strrchr(const char *s, int c) {
-    /* TODO: last occurrence of c, or NULL. Used for path extension
-     * checks (".wad"). */
-    (void)s;
-    (void)c;
-    todo("strrchr");
-    return NULL;
+    if (!s) {
+      return NULL;
+    }
+
+    const char *last = NULL;
+    char ch = (char)c;
+
+    while (*s != '\0') {
+        if (*s == ch) {
+            last = s;
+        }
+        s++;
+    }
+
+    if (ch == '\0') {
+        return (char *)s;
+    }
+
+    return (char *)last;
 }
 
 char *strstr(const char *hay, const char *needle) {
