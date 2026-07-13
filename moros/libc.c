@@ -181,9 +181,7 @@ void *realloc(void *ptr, size_t size) {
 }
 
 int abs(int n) {
-    /* TODO: one line. Called from the renderer's inner loops. */
-    todo("abs");
-    return n;
+    return (n < 0) ? -n : n;
 }
 
 int atoi(const char *s) {
