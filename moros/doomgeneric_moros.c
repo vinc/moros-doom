@@ -144,10 +144,7 @@ uint32_t DG_GetTicksMs(void) {
 }
 
 void DG_SleepMs(uint32_t ms) {
-    /* TODO: sleep(ms / 1000.0). One line with the f64 wrapper from
-     * moros.c. */
-    (void)ms;
-    todo("DG_SleepMs");
+    sleep(ms / 1000.0);
 }
 
 void DG_SetWindowTitle(const char *title) {
