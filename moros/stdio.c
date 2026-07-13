@@ -174,7 +174,20 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap) {
                 writen++;
                 break;
             }
-
+            case 's': {
+                const char *str = va_arg(ap, const char *);
+                if (!str) {
+                    str = "(null)";
+                }
+                while (*str) {
+                    if (writen + 1 < size && buf) {
+                        buf[writen] = *str;
+                    }
+                    writen++;
+                    str++;
+                }
+                break;
+            }
             default: {
                 if (*fmt) {
                     if (writen + 1 < size && buf) {
