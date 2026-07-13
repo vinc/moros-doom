@@ -260,13 +260,11 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap) {
 }
 
 int snprintf(char *buf, size_t size, const char *fmt, ...) {
-    /* TODO: va_start, vsnprintf, va_end. Three lines. */
-    (void)fmt;
-    todo("snprintf");
-    if (size > 0) {
-        buf[0] = '\0';
-    }
-    return 0;
+    va_list ap;
+    va_start(ap, fmt);
+    int n = vsnprintf(buf, size, fmt, ap);
+    va_end(ap);
+    return n;
 }
 
 int vfprintf(FILE *f, const char *fmt, va_list ap) {
