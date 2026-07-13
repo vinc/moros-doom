@@ -63,7 +63,7 @@ void DG_Init(void) {
     vga_buffer_fh  = open("/dev/vga/buffer", 64);
     kbd_buffer_fh  = open("/dev/kbd/buffer", 64);
 
-    write(vga_mode_fh, "320x200", 7);
+    //write(vga_mode_fh, "320x200", 7);
 }
 
 void DG_DrawFrame(void) {
@@ -137,6 +137,6 @@ int main(int argc, char **argv) {
         doomgeneric_Tick();
     }
 
-    write(vga_mode_fh, "80x25", 5);
+    //write(vga_mode_fh, "80x25", 5);
     return 0;
 }
