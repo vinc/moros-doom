@@ -23,6 +23,8 @@ extern struct color {
 } colors[256];
 extern int palette_changed;
 
+static unsigned char palette[768];
+
 static const unsigned char keys[128] = {
     [0x01] = KEY_ESCAPE,
     [0x02] = '1',
@@ -64,32 +66,23 @@ void DG_Init(void) {
     vga_palette_fh = open("/dev/vga/palette", 64);
     vga_buffer_fh  = open("/dev/vga/buffer", 64);
     kbd_buffer_fh  = open("/dev/kbd/buffer", 64);
-
-    //write(vga_mode_fh, "320x200", 7);
 }
 
 void DG_DrawFrame(void) {
-    /* TODO: two writes.
-     *
-     * 1. If palette_changed: convert colors[] (BGRA) into a 768 byte
-     *    R,G,B array and write it to /dev/vga/palette, then clear
-     *    palette_changed. This fires on boot and on item pickups
-     *    (the yellow flash is a palette swap).
-     *
-     * 2. Write all 64000 bytes of DG_ScreenBuffer to
-     *    /dev/vga/buffer. One write, one blit; the device always
-     *    blits from offset 0. */
-    todo("DG_DrawFrame");
+    static int graphics_on = 0;
+    if (!graphics_on) {
+        write(vga_mode_fh, "320x200", 7);
+        graphics_on = 1;
+    }
     if (palette_changed) {
-        unsigned char *palette = malloc(768);
         for (int i = 0; i < 256; i++) {
             palette[i * 3 + 0] = colors[i].r;
             palette[i * 3 + 1] = colors[i].g;
             palette[i * 3 + 2] = colors[i].b;
         }
-        //write(vga_palette_fh, palette, 768);
+        write(vga_palette_fh, palette, 768);
     }
-    //write(vga_buffer_fh, DG_ScreenBuffer, 64000);
+    write(vga_buffer_fh, DG_ScreenBuffer, 64000);
 }
 
 int DG_GetKey(int *pressed, unsigned char *doomKey) {
@@ -139,7 +132,6 @@ uint32_t DG_GetTicksMs(void) {
         }
     }
 
-    printf("DG_GetTicksMs: s=%d ms=%d\n", seconds, ms_fraction);
     return (seconds * 1000) + ms_fraction;
 }
 
@@ -159,6 +151,6 @@ int main(int argc, char **argv) {
         doomgeneric_Tick();
     }
 
-    //write(vga_mode_fh, "80x25", 5);
+    write(vga_mode_fh, "80x25", 5);
     return 0;
 }
