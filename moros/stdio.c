@@ -44,17 +44,9 @@ FILE *stdout = &files[1];
 FILE *stderr = &files[2];
 
 FILE *fopen(const char *path, const char *mode) {
-    /* TODO: parse mode ("r", "rb", "w", "wb", "a"...) into MOROS
-     * OpenFlags (OPEN_READ is 0 for plain files, OPEN_WRITE |
-     * OPEN_CREATE | OPEN_TRUNCATE for "w", | OPEN_APPEND for "a"),
-     * call open(), and on success take a free slot from files[].
-     * Return NULL on failure. DOOM calls this from the WAD loader
-     * (w_file_stdc.c), config loading, and savegames. Binary vs text
-     * mode is meaningless here: ignore 'b'. */
     if (!path || !mode) {
       return NULL;
     }
-    printf("fopen: opening '%s' (mode: '%s')\n", path, mode);
     int flags = 0;
     switch (mode[0]) {
         case 'r':
