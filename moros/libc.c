@@ -208,7 +208,9 @@ int toupper(int c) {
 }
 
 int tolower(int c) {
-    todo("tolower");
+    if (c >= 'A' && c <= 'Z') {
+        return c + ('a' - 'A');
+    }
     return c;
 }
 
