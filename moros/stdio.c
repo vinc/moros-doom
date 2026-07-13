@@ -113,18 +113,55 @@ int fflush(FILE *f) {
  */
 
 int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap) {
-    /* TODO: walk fmt, copy literals, dispatch on '%'. Keep a write
-     * cursor; never write more than size-1 chars; always NUL
-     * terminate; return the number of chars that WOULD have been
-     * written (callers use it to detect truncation). Reuse the digit
-     * loops from print_num/print_hex in moros.c. */
-    (void)fmt;
-    (void)ap;
-    todo("vsnprintf");
-    if (size > 0) {
-        buf[0] = '\0';
+    int writen = 0;
+    if (!fmt) {
+      return -1;
     }
-    return 0;
+
+    while (*fmt) {
+        if (*fmt != '%') {
+            if (writen + 1 < size && buf) {
+                buf[writen] = *fmt;
+            }
+            writen++;
+            fmt++;
+            continue;
+        }
+
+        fmt++; // Skip '%'
+
+        switch (*fmt) {
+            case 'c': {
+                char c = (char)va_arg(ap, int);
+                if (writen + 1 < size && buf) {
+                    buf[writen] = c;
+                }
+                writen++;
+                break;
+            }
+
+            default: {
+                if (*fmt) {
+                    if (writen + 1 < size && buf) {
+                        buf[writen] = *fmt;
+                    }
+                    writen++;
+                }
+                break;
+            }
+        }
+
+        if (*fmt) {
+          fmt++; // Skip specifier
+        }
+    }
+
+    if (size > 0 && buf) {
+        size_t null_idx = (writen < size) ? (size_t)writen : (size - 1);
+        buf[null_idx] = '\0';
+    }
+
+    return writen;
 }
 
 int snprintf(char *buf, size_t size, const char *fmt, ...) {
