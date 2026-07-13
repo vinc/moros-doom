@@ -17,6 +17,7 @@
 #include "moros.h"
 #include "doomgeneric.h"
 #include "doomkeys.h"
+#include "i_system.h"
 
 extern struct color {
     unsigned int b:8, g:8, r:8, a:8;
@@ -60,6 +61,11 @@ static long vga_palette_fh = -1;
 static long vga_buffer_fh = -1;
 static long kbd_buffer_fh = -1;
 
+static void restore_text_mode(void) {
+    write(vga_mode_fh, "80x25", 5);
+    printf("\x1b[2J\x1b[1;1H"); // Clear screen and move to top
+}
+
 void DG_Init(void) {
     clk_boot_fh    = open("/dev/clk/boot", 64);
     vga_mode_fh    = open("/dev/vga/mode", 64);
@@ -72,6 +78,7 @@ void DG_DrawFrame(void) {
     static int graphics_on = 0;
     if (!graphics_on) {
         write(vga_mode_fh, "320x200", 7);
+        I_AtExit(restore_text_mode, 1);
         graphics_on = 1;
     }
     if (palette_changed) {
@@ -150,7 +157,5 @@ int main(int argc, char **argv) {
     for (;;) {
         doomgeneric_Tick();
     }
-
-    write(vga_mode_fh, "80x25", 5);
     return 0;
 }
