@@ -210,9 +210,18 @@ int sscanf(const char *str, const char *fmt, ...) {
 /* --- Small ones ---------------------------------------------------- */
 
 int puts(const char *s) {
-    /* TODO: print(s) plus a newline; return a nonnegative value. */
-    (void)s;
-    todo("puts");
+    if (!s) {
+      return -1;
+    }
+    size_t len = 0;
+    while (s[len] != '\0') {
+      len++;
+    }
+    if (len > 0) {
+      write(stdout->handle, s, len);
+    }
+    char ch = '\n';
+    write(stdout->handle, &ch, 1);
     return 0;
 }
 
