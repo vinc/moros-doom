@@ -93,12 +93,7 @@ size_t fread(void *ptr, size_t size, size_t n, FILE *f) {
     /* TODO: read(f->handle, ptr, size * n) and return the number of
      * complete ITEMS read (bytes / size), not bytes. The WAD loader
      * depends on this distinction. A short read is not an error. */
-    (void)ptr;
-    (void)size;
-    (void)n;
-    (void)f;
-    todo("fread");
-    return 0;
+    return read(f->handle, ptr, size * n) / size;
 }
 
 size_t fwrite(const void *ptr, size_t size, size_t n, FILE *f) {
