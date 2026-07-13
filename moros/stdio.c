@@ -226,11 +226,14 @@ int puts(const char *s) {
 }
 
 int putc(int c, FILE *f) {
-    /* TODO: write the single byte; return c. */
-    (void)c;
-    (void)f;
-    todo("putc");
-    return EOF;
+    if (!f) {
+      return -1;
+    }
+    char ch = (char)c;
+    if (write(f->handle, &ch, 1) < 0) {
+      return -1;
+    }
+    return (unsigned char)c;
 }
 
 int putchar(int c) {
