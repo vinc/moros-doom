@@ -23,6 +23,33 @@ extern struct color {
 } colors[256];
 extern int palette_changed;
 
+static const unsigned char keys[128] = {
+    [0x01] = KEY_ESCAPE,
+    [0x02] = '1',
+    [0x03] = '2',
+    [0x04] = '3',
+    [0x05] = '4',
+    [0x06] = '5',
+    [0x07] = '6',
+    [0x08] = '7',
+    [0x09] = '8',
+    [0x0A] = '9',
+    [0x0F] = KEY_TAB,
+    [0x11] = KEY_UPARROW,   // W
+    [0x15] = 'y',
+    [0x1C] = KEY_ENTER,
+    [0x1D] = KEY_FIRE,      // Left Ctrl
+    [0x1E] = KEY_STRAFE_L,  // A
+    [0x1F] = KEY_DOWNARROW, // S
+    [0x20] = KEY_STRAFE_R,  // D
+    [0x2A] = KEY_RSHIFT,    // Left Shift
+    [0x39] = KEY_USE,       // Spacebar
+    [0x48] = KEY_UPARROW,   // Arrow Up (extended)
+    [0x4B] = KEY_LEFTARROW, // Arrow Left (extended)
+    [0x4D] = KEY_RIGHTARROW,// Arrow Right (extended)
+    [0x50] = KEY_DOWNARROW, // Arrow Down (extended)
+};
+
 void todo(const char *name);
 
 static long vga_mode_fh = -1;
@@ -51,34 +78,35 @@ void DG_DrawFrame(void) {
      *    /dev/vga/buffer. One write, one blit; the device always
      *    blits from offset 0. */
     todo("DG_DrawFrame");
+    if (palette_changed) {
+        unsigned char *palette = malloc(768);
+        for (int i = 0; i < 256; i++) {
+            palette[i * 3 + 0] = colors[i].r;
+            palette[i * 3 + 1] = colors[i].g;
+            palette[i * 3 + 2] = colors[i].b;
+        }
+        //write(vga_palette_fh, palette, 768);
+    }
+    //write(vga_buffer_fh, DG_ScreenBuffer, 64000);
 }
 
 int DG_GetKey(int *pressed, unsigned char *doomKey) {
-    /* TODO: read one byte from /dev/kbd/buffer. A return of 0 from
-     * read() means the queue is empty: return 0. Otherwise:
-     *
-     *   *pressed = (scancode & 0x80) == 0;
-     *   *doomKey = table[scancode & 0x7F];
-     *
-     * and return 1. Unmapped scancodes should be skipped by reading
-     * again, not returned as key 0. The set 1 make codes DOOM wants
-     * (see doomkeys.h for the KEY_* values):
-     *
-     *   0x01 esc      KEY_ESCAPE     0x1C enter  KEY_ENTER
-     *   0x39 space    KEY_USE        0x1D lctrl  KEY_FIRE
-     *   0x48 up       KEY_UPARROW    0x50 down   KEY_DOWNARROW
-     *   0x4B left     KEY_LEFTARROW  0x4D right  KEY_RIGHTARROW
-     *   0x11 w        KEY_UPARROW    0x1F s      KEY_DOWNARROW
-     *   0x1E a        KEY_STRAFE_L   0x20 d      KEY_STRAFE_R
-     *   0x2A lshift   KEY_RSHIFT     0x0F tab    KEY_TAB
-     *   0x02..0x0A    '1'..'9' (weapon select)   0x15 y  'y'
-     *
-     * Note: 0x48/0x50/0x4B/0x4D are the extended arrow codes and
-     * arrive prefixed with 0xE0 on real hardware; either handle the
-     * prefix or use WASD first and refine later. */
-    (void)pressed;
-    (void)doomKey;
-    return 0;
+    unsigned char scancode;
+    while (1) {
+        if (read(kbd_buffer_fh, &scancode, 1) < 1) {
+            return 0; // Empty buffer
+        }
+        if (scancode == 0xE0) {
+            continue;
+        }
+        unsigned char mapped = keys[scancode & 0x7F];
+        if (mapped == 0) {
+            continue;
+        }
+        *pressed = (scancode & 0x80) == 0;
+        *doomKey = mapped;
+        return 1;
+    }
 }
 
 uint32_t DG_GetTicksMs(void) {
