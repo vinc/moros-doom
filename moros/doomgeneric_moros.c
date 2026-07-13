@@ -25,12 +25,18 @@ extern int palette_changed;
 
 void todo(const char *name);
 
+static long vga_mode_fh = -1;
+static long vga_palette_fh = -1;
+static long vga_buffer_fh = -1;
+static long kbd_buffer_fh = -1;
+
 void DG_Init(void) {
-    /* TODO: open /dev/vga/mode, /dev/vga/palette, /dev/vga/buffer,
-     * and /dev/kbd/buffer with OPEN_DEVICE, keep the handles in
-     * static globals (safe under USER_ADDR), and write "320x200" to
-     * the mode device. Compare demo.c test_video(). */
-    todo("DG_Init");
+    vga_mode_fh    = open("/dev/vga/mode", 64);
+    vga_palette_fh = open("/dev/vga/palette", 64);
+    vga_buffer_fh  = open("/dev/vga/buffer", 64);
+    kbd_buffer_fh  = open("/dev/kbd/buffer", 64);
+
+    write(vga_mode_fh, "320x200", 7);
 }
 
 void DG_DrawFrame(void) {
@@ -102,5 +108,7 @@ int main(int argc, char **argv) {
     for (;;) {
         doomgeneric_Tick();
     }
+
+    write(vga_mode_fh, "80x25", 5);
     return 0;
 }
