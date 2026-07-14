@@ -1,10 +1,3 @@
-/* string.h, stdlib.h, ctype.h, math.h, and errno for MOROS DOOM.
- *
- * Same convention as stdio.c: every stub reports itself when called,
- * so running DOOM produces the worklist. memcpy, memmove, memset,
- * memcmp, strlen, malloc, free, and exit already live in moros.c.
- */
-
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -18,22 +11,11 @@ void todo(const char *name) {
     print("\n");
 }
 
-void assert_fail(const char *expr, const char *file, int line) {
-    print("assert failed: ");
-    print(expr);
-    print(" at ");
-    print(file);
-    print(":");
-    print_num(line);
-    print("\n");
-    exit(1);
-}
-
 /* --- string.h ------------------------------------------------------ */
 
 // Source: musl
 int strcmp(const char *l, const char *r) {
-    for (; *l==*r && *l; l++, r++);
+    for (; *l==*r && *l; l++, r++) {};
 	  return *(unsigned char *)l - *(unsigned char *)r;
 }
 
@@ -242,10 +224,7 @@ int mkdir(const char *path, unsigned int mode) {
     return -1;
 }
 
-/* --- ctype.h -------------------------------------------------------
- *
- * TODO: all of these are one-liners on ASCII. No locales, no tables.
- */
+/* --- ctype.h -------------------------------------------------------*/
 
 int toupper(int c) {
     if (c >= 'a' && c <= 'z') {
@@ -274,16 +253,19 @@ int isdigit(int c) {
 }
 
 int isalpha(int c) {
+    todo("isalpha");
     (void)c;
     return 0;
 }
 
 int isupper(int c) {
+    todo("isupper");
     (void)c;
     return 0;
 }
 
 int islower(int c) {
+    todo("islower");
     (void)c;
     return 0;
 }

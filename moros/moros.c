@@ -1,5 +1,3 @@
-/* See moros.h */
-
 #include "moros.h"
 
 /* Process ------------------------------------------------------------- */
@@ -10,7 +8,6 @@ void exit(int code) {
 }
 
 void sleep(double seconds) {
-    /* The kernel reads the argument as the raw bits of an f64 */
     union { double f; long i; } bits = { .f = seconds };
     syscall1(SYS_SLEEP, bits.i);
 }
@@ -92,12 +89,7 @@ void free(void *ptr) {
     syscall3(SYS_FREE, (long)header, (long)header->size, MALLOC_ALIGN);
 }
 
-/* Strings ---------------------------------------------------------------
- *
- * memcpy, memmove, memset, and memcmp must exist even in freestanding
- * mode: the compiler emits calls to them for struct copies and array
- * initialization.
- */
+/* Strings ---------------------------------------------------------------*/
 
 void *memcpy(void *dst, const void *src, size_t n) {
     unsigned char *d = dst;
@@ -154,31 +146,4 @@ size_t strlen(const char *s) {
 
 void print(const char *s) {
     write(1, s, strlen(s));
-}
-
-void print_num(long n) {
-    char buf[24];
-    char *p = buf + sizeof(buf);
-    bool neg = n < 0;
-    unsigned long u = neg ? -(unsigned long)n : (unsigned long)n;
-    do {
-        *--p = '0' + (char)(u % 10);
-        u /= 10;
-    } while (u);
-    if (neg) {
-        *--p = '-';
-    }
-    write(1, p, (size_t)(buf + sizeof(buf) - p));
-}
-
-void print_hex(unsigned long n) {
-    char buf[18];
-    char *p = buf + sizeof(buf);
-    do {
-        *--p = "0123456789ABCDEF"[n % 16];
-        n /= 16;
-    } while (n);
-    *--p = 'x';
-    *--p = '0';
-    write(1, p, (size_t)(buf + sizeof(buf) - p));
 }

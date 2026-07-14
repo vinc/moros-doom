@@ -1,18 +1,3 @@
-/* MOROS platform layer for doomgeneric.
- *
- * These six functions are the entire surface between DOOM and MOROS.
- * The proof of concept in demo.c contains a working version of each
- * mechanism: mode switching, palette upload, full-frame blits,
- * scancode draining, and sleep. This file is where they become the
- * real thing.
- *
- * Under CMAP256 (set in the Makefile), i_video.c exports:
- *
- *   pixel_t *DG_ScreenBuffer;      8-bit indexed, 320 * 200 bytes
- *   struct color colors[256];      current palette, BGRA byte order
- *   boolean palette_changed;       set by I_SetPalette
- */
-
 #include <stdio.h>
 #include "moros.h"
 #include "doomgeneric.h"
@@ -22,6 +7,7 @@
 extern struct color {
     unsigned int b:8, g:8, r:8, a:8;
 } colors[256];
+
 extern int palette_changed;
 
 static unsigned char palette[768];
@@ -47,10 +33,10 @@ static const unsigned char keys[128] = {
     [0x20] = KEY_STRAFE_R,  // D
     [0x2A] = KEY_RSHIFT,    // Left Shift
     [0x39] = KEY_USE,       // Spacebar
-    [0x48] = KEY_UPARROW,   // Arrow Up (extended)
-    [0x4B] = KEY_LEFTARROW, // Arrow Left (extended)
-    [0x4D] = KEY_RIGHTARROW,// Arrow Right (extended)
-    [0x50] = KEY_DOWNARROW, // Arrow Down (extended)
+    [0x48] = KEY_UPARROW,   // Arrow Up
+    [0x4B] = KEY_LEFTARROW, // Arrow Left
+    [0x4D] = KEY_RIGHTARROW,// Arrow Right
+    [0x50] = KEY_DOWNARROW, // Arrow Down
 };
 
 void todo(const char *name);
@@ -76,11 +62,12 @@ void DG_Init(void) {
 
 void DG_DrawFrame(void) {
     static int graphics_on = 0;
-    if (!graphics_on) {
+    if (!graphics_on) { // Setup
+        graphics_on = 1;
         write(vga_mode_fh, "320x200", 7);
         I_AtExit(restore_text_mode, 1);
-        graphics_on = 1;
     }
+
     if (palette_changed) {
         for (int i = 0; i < 256; i++) {
             palette[i * 3 + 0] = colors[i].r;
@@ -112,34 +99,33 @@ int DG_GetKey(int *pressed, unsigned char *doomKey) {
 }
 
 uint32_t DG_GetTicksMs(void) {
-    char buf[32];
+    char buf[32]; // Example: "123.45678" seconds
+
     long bytes = read(clk_boot_fh, buf, sizeof(buf) - 1);
     if (bytes <= 0) {
         return 0;
     }
     buf[bytes] = '\0';
 
-    uint32_t seconds = 0;
-    uint32_t ms_fraction = 0;
-    const char *p = buf;
+    uint32_t seconds = 0; // 123
+    uint32_t fraction = 0; // 456
+    uint32_t scale = 100;
 
-    while (*p >= '0' && *p <= '9') {
-        seconds = seconds * 10 + (*p - '0');
-        p++;
+    const char *ptr = buf;
+    while (*ptr >= '0' && *ptr <= '9') {
+        seconds = seconds * 10 + (*ptr - '0');
+        ptr++;
     }
-
-    if (*p == '.') {
-        p++;
-        uint32_t scale = 100;
-
-        while (*p >= '0' && *p <= '9' && scale > 0) {
-            ms_fraction += (*p - '0') * scale;
+    if (*ptr == '.') {
+        ptr++;
+        while (*ptr >= '0' && *ptr <= '9' && scale > 0) {
+            fraction += (*ptr - '0') * scale;
             scale /= 10;
-            p++;
+            ptr++;
         }
     }
 
-    return (seconds * 1000) + ms_fraction;
+    return (seconds * 1000) + fraction; // 123456
 }
 
 void DG_SleepMs(uint32_t ms) {
@@ -147,12 +133,10 @@ void DG_SleepMs(uint32_t ms) {
 }
 
 void DG_SetWindowTitle(const char *title) {
-    /* No window. Printing it once at boot is a nice touch. */
     (void)title;
 }
 
 int main(int argc, char **argv) {
-    /* Run as: doom -iwad /path/to/doom1.wad */
     doomgeneric_Create(argc, argv);
     for (;;) {
         doomgeneric_Tick();

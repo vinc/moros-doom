@@ -1,12 +1,4 @@
 # MOROS DOOM
-#
-# `make` builds bin/doom against the doomgeneric sources in ../doomgeneric
-# and the freestanding support layer in this directory. Functions still
-# to be implemented print "TODO: <name>" over serial when DOOM calls
-# them: implement, make, run, repeat.
-#
-# `make demo` builds the standalone proof of concept.
-# `make install moros=path/to/moros` copies binaries into the MOROS dsk.
 
 moros = ../../moros
 DG = ../doomgeneric

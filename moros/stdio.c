@@ -1,11 +1,3 @@
-/* stdio for MOROS DOOM, built on the raw layer in moros.c.
- *
- * Every function below is a stub that reports itself over serial when
- * called, so a running DOOM produces a worklist. Implement, rebuild,
- * run again. The design notes in each TODO describe the minimum DOOM
- * needs, not the full C standard.
- */
-
 #include <stdio.h>
 #include <string.h>
 #include "moros.h"
@@ -92,9 +84,6 @@ int fclose(FILE *f) {
 }
 
 size_t fread(void *ptr, size_t size, size_t n, FILE *f) {
-    /* TODO: read(f->handle, ptr, size * n) and return the number of
-     * complete ITEMS read (bytes / size), not bytes. The WAD loader
-     * depends on this distinction. A short read is not an error. */
     return read(f->handle, ptr, size * n) / size;
 }
 
@@ -122,15 +111,6 @@ int fflush(FILE *f) {
     (void)f;
     return 0;
 }
-
-/* --- The formatter -------------------------------------------------
- *
- * Everything funnels into vsnprintf. This is the one function with
- * real internals in the whole port. The format specs DOOM actually
- * uses: %s %d %i %u %x %c %% %ld %lu, field width with optional zero
- * padding (%3d, %02x), and %.Ns precision for strings. No floats are
- * ever printed. Grep the doom sources before adding anything else.
- */
 
 int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap) {
     return npf_vsnprintf(buf, size, fmt, ap);
@@ -176,8 +156,6 @@ int sscanf(const char *str, const char *fmt, ...) {
     (void)fmt;
     return 0;
 }
-
-/* --- Small ones ---------------------------------------------------- */
 
 int puts(const char *s) {
     if (!s) {
