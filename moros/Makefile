@@ -31,11 +31,7 @@ DOOM_CFLAGS = $(CFLAGS) -I $(DG) -DCMAP256 \
 
 LDFLAGS = -nostdlib -static -n -e _start -Ttext=0x8000800000
 
-# Every doomgeneric source except the other platform backends and the
-# SDL/Allegro sound modules. i_sound.c stays: it is the no-op dispatcher.
-DOOM_SRC = $(filter-out \
-	$(DG)/doomgeneric_% $(DG)/i_allegro% $(DG)/i_sdl%, \
-	$(wildcard $(DG)/*.c))
+DOOM_SRC = $(wildcard $(DG)/*.c))
 DOOM_OBJ = $(patsubst $(DG)/%.c, build/dg/%.o, $(DOOM_SRC))
 
 MOROS_SRC = crt0.c moros.c libc.c stdio.c doomgeneric_moros.c
