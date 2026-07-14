@@ -8,7 +8,7 @@ MOROS doesn't have a libc so DOOM is a freestanding executable
 using [nanoprintf](https://github.com/charlesnicholson/nanoprintf),
 and some functions from [musl](https://musl.libc.org/).
 
-## Build on UNIX
+## Build on Unix
 
     $ cd moros
     $ make install
@@ -20,6 +20,5 @@ and some functions from [musl](https://musl.libc.org/).
 
 ## License
 
-DOOM and doomgeneric are released under the GPL, so this port is GPL as well.
-nanoprintf is public domain (0BSD / Unlicense) and the borrowed musl functions
-are MIT-licensed.
+DOOM and doomgeneric are released under the GPL, so this port is GPL as well,
+nanoprintf is public domain and the borrowed musl functions are MIT-licensed.
