@@ -613,7 +613,7 @@ static void BuildIWADDirList(void)
 
 #endif
 #else
-    AddIWADDir (FILES_DIR);
+    AddIWADDir(FILES_DIR);
 
     // Don't run this function again.
 
