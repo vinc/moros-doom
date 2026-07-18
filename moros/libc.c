@@ -107,11 +107,14 @@ char *strstr(const char *hay, const char *needle) {
     return (char *)hay;
 }
 
+// Source: musl
 char *strdup(const char *s) {
-    /* TODO: malloc(strlen + 1) + memcpy. */
-    (void)s;
-    todo("strdup");
-    return NULL;
+    size_t l = strlen(s);
+    char *d = malloc(l + 1);
+    if (!d) {
+      return NULL;
+    }
+    return memcpy(d, s, l + 1);
 }
 
 /* --- stdlib.h ------------------------------------------------------ */
