@@ -3,10 +3,10 @@
 moros = ../../moros
 DG = ../doomgeneric
 
-CC = x86_64-elf-gcc
-LD = x86_64-elf-ld
-#CC = cc
-#LD = ld
+#CC = x86_64-elf-gcc
+#LD = x86_64-elf-ld
+CC = cc
+LD = ld
 
 # -ffreestanding        no hosted libc environment
 # -nostdinc             only our include/ and the compiler's own headers
